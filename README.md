@@ -1,22 +1,22 @@
-pgxl-docker
-===========
+# pgxl-docker
 
-Test of Postgresql-XL with Docker. PostgreSQL-XL is a new MPP fork of PostgreSQL.
+[Postgre-XL](http://www.postgres-xl.org/) is a new MPP fork of [PostgreSQL](http://www.postgresql.org).
 
-This version is a test of integration of PostgreSQL-XL with Docker, the default configuration file runs 4 data nodes, 1 gtm and 1 coordinator.
+This version is a test of Postgre-XL with Docker, the default configuration file runs 4 data nodes, 1 gtm and 1 coordinator.
 The docker configuration is not fully functional and is unsecure (run with docker privilegied mode, no password for postgresql coordinator).
 
-Build
-=====
+### Implementation
+
+The latest GIT version of Postgres-XL is used. The daemons are started with [supervisord](http://supervisord.org/).
+
+### Build
 
 `fig build`
 
-Run
-===
+### Run
 
 `fig up`
 
-Authors
-=======
+### Authors
 
 Matthieu Lagacherie and Yannick Drant, postmind project.
