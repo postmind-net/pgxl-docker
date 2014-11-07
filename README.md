@@ -19,4 +19,4 @@ The latest GIT version of Postgres-XL is used. The daemons are started with [sup
 
 ### Authors
 
-Matthieu Lagacherie and Yannick Drant.
+Matthieu Lagacherie and Yannick Drant
