@@ -18,6 +18,7 @@ RUN apt-get install -y software-properties-common
 RUN apt-get install -y curl flex bison zlib1g-dev libreadline6-dev gcc make supervisor git \
                     openssh-server openssh-client rsync
 RUN apt-get install -y python-dev
+RUN apt-get install -y pgxnclient
 
 ### LOCALE
 
@@ -44,6 +45,11 @@ RUN make install
 
 ENV PATH /opt/pgxl/bin:$PATH
 ENV PGDATA /pom/pgxc
+
+### PG EXTENSIONS
+
+RUN pgxnclient install json_enhancements
+
 
 ### LD
 
