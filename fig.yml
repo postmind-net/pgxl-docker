@@ -1,6 +1,8 @@
 pgxl:
   build: pgxl
   privileged: true
-  ports:
-    - "5432:5432"
-    - "9001:9001"
+#  ports:
+#    - "5432:5432"
+#    - "9001:9001"
+  volumes:
+    - pom:/pom
