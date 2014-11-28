@@ -5,7 +5,7 @@
 This version is a test of Postgre-XL with Docker, the default configuration file runs several data nodes, 1 gtm and 1 coordinator.
 The docker configuration is not fully functional and is unsecure (run with docker privilegied mode, no password for postgresql coordinator).
 
-We have written a tutorial explaining the use of this docker configuration.
+We have written a [tutorial](http://www.postmind.net/pgxl_docker-en.html) explaining the use of this docker configuration.
 
 ### Authors
 
