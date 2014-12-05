@@ -1,2 +1,2 @@
 #!/bin/sh
-sudo weave launch
+sudo weave launch $@
