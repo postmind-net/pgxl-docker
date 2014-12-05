@@ -168,6 +168,7 @@ if args.ip:
 if args.conf:
     ctn = get_containers(dcl)
     ips = [c["ip"] for c in ctn]
+    ips = ["10.0.1.%d" %i for i in range(1, 4)]
     conf = get_conf(ips)
     with open("%s/pgxc_ctl.conf" %args.conf, "w+") as fp:
         fp.write(conf.getvalue())
