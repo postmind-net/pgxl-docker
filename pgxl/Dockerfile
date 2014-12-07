@@ -81,10 +81,6 @@ ENV HOME /pom
 ENTRYPOINT ["/app/entrypoint.sh"]
 
 EXPOSE 5432
-EXPOSE 20001
-EXPOSE 20010
-EXPOSE 21000
-EXPOSE 21010
 
 CMD ["supervisor"]
 

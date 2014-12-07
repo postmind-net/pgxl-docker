@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser(description='PGXL startpack')
 parser.add_argument('--ip', dest="ip", action="store_true", help="print container IP")
 parser.add_argument('--ncontainers', dest="ncontainers", action="store", type=int, default=4, help="N containers")
 parser.add_argument('--conf', dest='conf', action="store", type=str, help="generate configuration file")
+parser.add_argument('--static', dest='static', action="store", type=str, default=None, help="generate configuration file")
+
 
 args = parser.parse_args()
 dcl = Client()
@@ -166,9 +168,11 @@ if args.ip:
     print get_containers(dcl)
 
 if args.conf:
-    ctn = get_containers(dcl)
-    ips = [c["ip"] for c in ctn]
-    ips = ["10.0.1.%d" %i for i in range(1, 4)]
+    if args.static == None:
+	   ctn = get_containers(dcl)
+	   ips = [c["ip"] for c in ctn]
+    else:
+	   ips = ["10.0.1.%d" %i for i in range(1, int(args.static) + 1)]
     conf = get_conf(ips)
     with open("%s/pgxc_ctl.conf" %args.conf, "w+") as fp:
         fp.write(conf.getvalue())
