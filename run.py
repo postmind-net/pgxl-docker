@@ -10,7 +10,7 @@ parser.add_argument('--ip', dest="ip", action="store_true", help="print containe
 parser.add_argument('--ncontainers', dest="ncontainers", action="store", type=int, default=4, help="N containers")
 parser.add_argument('--conf', dest='conf', action="store", type=str, help="generate configuration file")
 parser.add_argument('--static', dest='static', action="store", type=str, default=None, help="generate configuration file")
-
+parser.add_argument('--local', dest='local', action="store", type=int, default=0, help="local mode")
 
 args = parser.parse_args()
 dcl = Client()
@@ -25,18 +25,18 @@ def get_containers(dcl):
         cts.append({"name": name, "ip": ip})
     return cts
 
-def get_conf(ips):
+def get_conf(ips, local_mode=False):
     servers = ["PGXL%d" %i for i in range(len(ips))]
     servers_ip = ips
-    datanodes = servers[1:]
-    datanodes_ip = servers_ip[1:]
+    datanodes = servers
+    datanodes_ip = servers_ip
     nnodes = len(datanodes)
     gtm_server = servers_ip[0]
     gtm_port = 20001
     #coord_server = datanodes_ip[0]
     conf = StringIO()
     conf.write("""
-pgxcOwner=pom
+pgxcOwner=$USER
 pgxcUser=$pgxcOwner
 tmpDir=/tmp
 localTmpDir=$tmpDir
@@ -51,7 +51,8 @@ gtmExtraConfig=none
 gtmMasterSpecificExtraConfig=none
 """.format(gtm_server, gtm_port))
 
-    conf.write("""
+    if not local_mode:
+        conf.write("""
 gtmProxyDir=$HOME/pgxc/nodes/gtm_pxy
 gtmProxy=y
 gtmProxyNames=({0})
@@ -66,7 +67,37 @@ gtmPxySpecificExtraConfig=({4})
            ' '.join(["$gtmProxyDir"] * nnodes),
            ' '.join(["none"] * nnodes)))
 
-    conf.write("""
+    if local_mode:
+        conf.write("""
+coordMasterDir=$HOME/pgxc/nodes/coord
+coordSlaveDir=$HOME/pgxc/nodes/coord_slave
+coordArchLogDir=$HOME/pgxc/nodes/coord_archlog
+coordNames=(COORD)
+coordPorts=(5432)
+poolerPorts=(20010)
+coordPgHbaEntries=(all)
+coordMasterServers=(127.0.0.1)
+coordMasterDirs=($coordMasterDir)
+coordMaxWALSenders=(5)
+coordSlave=n
+coordExtraConfig=coordExtraConfig
+cat > $coordExtraConfig <<EOF
+#================================================
+# Added to all the coordinator postgresql.conf
+# Original: $coordExtraConfig
+log_destination = 'stderr'
+logging_collector = on
+log_directory = 'pg_log'
+listen_addresses = '*'
+max_connections = 100
+log_filename = 'coordinator.log'
+EOF
+coordSpecificExtraConfig=(none)
+coordExtraPgHba=none
+coordSpecificExtraPgHba=(none)
+""")
+    else:
+        conf.write("""
 coordMasterDir=$HOME/pgxc/nodes/coord
 coordSlaveDir=$HOME/pgxc/nodes/coord_slave
 coordArchLogDir=$HOME/pgxc/nodes/coord_archlog
@@ -112,7 +143,8 @@ datanodePorts=({2})
 datanodePoolerPorts=({3})
 datanodePgHbaEntries=(all)
 """.format(datanodes[0], ' '.join(datanodes),
-           ' '.join(["21000"] * nnodes), ' '.join(["21010"] * nnodes)))
+           ' '.join(map(str, range(21000, 21000 + nnodes))),
+           ' '.join(map(str, range(22000, 22000 + nnodes)))))
     conf.write("""
 datanodeMasterServers=({0})
 datanodeMasterDirs=({1})
@@ -168,12 +200,16 @@ if args.ip:
     print get_containers(dcl)
 
 if args.conf:
-    if args.static == None:
+    local_mode = False
+    if args.local > 0:
+        ips = ["127.0.0.1"] * args.local
+        local_mode = True
+    elif args.static == None:
 	   ctn = get_containers(dcl)
 	   ips = [c["ip"] for c in ctn]
     else:
-	   ips = ["10.0.1.%d" %i for i in range(1, int(args.static) + 1)]
-    conf = get_conf(ips)
+        ips = args.static.split(",")
+    conf = get_conf(ips, local_mode)
     with open("%s/pgxc_ctl.conf" %args.conf, "w+") as fp:
         fp.write(conf.getvalue())
     with open("%s/haproxy.cfg" %args.conf, "w+") as fp:
