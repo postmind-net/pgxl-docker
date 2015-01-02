@@ -22,7 +22,7 @@ echo "LC_ALL=fr_FR.UTF-8" >> ~/.pgxl
 cd /tmp
 git clone https://github.com/postmind-net/postgres-xl.git pgxl --depth 1
 cd /tmp/pgxl
-./configure --with-python --prefix /opt/pgxl
+PATH=$PATH:/opt/anaconda/bin ./configure --with-python --prefix /opt/pgxl
 make -j 4
 cd /tmp/pgxl/contrib
 make -j 4

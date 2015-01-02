@@ -11,6 +11,8 @@ parser.add_argument('--ncontainers', dest="ncontainers", action="store", type=in
 parser.add_argument('--conf', dest='conf', action="store", type=str, help="generate configuration file")
 parser.add_argument('--static', dest='static', action="store", type=str, default=None, help="generate configuration file")
 parser.add_argument('--local', dest='local', action="store", type=int, default=0, help="local mode")
+parser.add_argument('--gtmproxy', dest='gtmproxy', action="store_true", help="enable gtm proxies (distributed mode)")
+
 
 args = parser.parse_args()
 dcl = Client()
@@ -25,7 +27,7 @@ def get_containers(dcl):
         cts.append({"name": name, "ip": ip})
     return cts
 
-def get_conf(ips, local_mode=False):
+def get_conf(ips, local_mode=False, gtmproxy=False):
     servers = ["PGXL%d" %i for i in range(len(ips))]
     servers_ip = ips
     datanodes = servers
@@ -51,7 +53,7 @@ gtmExtraConfig=none
 gtmMasterSpecificExtraConfig=none
 """.format(gtm_server, gtm_port))
 
-    if not local_mode:
+    if gtmproxy:
         conf.write("""
 gtmProxyDir=$HOME/pgxc/nodes/gtm_pxy
 gtmProxy=y
@@ -201,15 +203,17 @@ if args.ip:
 
 if args.conf:
     local_mode = False
+    gtmproxy = args.gtmproxy
     if args.local > 0:
         ips = ["127.0.0.1"] * args.local
         local_mode = True
+	gtmproxy = False
     elif args.static == None:
 	   ctn = get_containers(dcl)
 	   ips = [c["ip"] for c in ctn]
     else:
         ips = args.static.split(",")
-    conf = get_conf(ips, local_mode)
+    conf = get_conf(ips, local_mode, gtmproxy)
     with open("%s/pgxc_ctl.conf" %args.conf, "w+") as fp:
         fp.write(conf.getvalue())
     with open("%s/haproxy.cfg" %args.conf, "w+") as fp:
