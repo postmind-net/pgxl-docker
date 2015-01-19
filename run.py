@@ -1,6 +1,5 @@
 __author__ = 'matthieu'
 
-from docker import Client
 import argparse
 from cStringIO import StringIO
 
@@ -15,7 +14,6 @@ parser.add_argument('--gtmproxy', dest='gtmproxy', action="store_true", help="en
 
 
 args = parser.parse_args()
-dcl = Client()
 
 def get_containers(dcl):
     containers = dcl.containers()
@@ -209,6 +207,9 @@ if args.conf:
         local_mode = True
 	gtmproxy = False
     elif args.static == None:
+	   from docker import Client
+
+	   dcl = Client()
 	   ctn = get_containers(dcl)
 	   ips = [c["ip"] for c in ctn]
     else:
