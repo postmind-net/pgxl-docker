@@ -3,6 +3,9 @@ __author__ = 'matthieu'
 import argparse
 from cStringIO import StringIO
 
+from docker import Client
+dcl = Client()
+
 
 parser = argparse.ArgumentParser(description='PGXL startpack')
 parser.add_argument('--ip', dest="ip", action="store_true", help="print container IP")
