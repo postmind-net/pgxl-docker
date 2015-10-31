@@ -1,0 +1,10 @@
+pgxl:
+  build: pgxl
+  privileged: true
+#  mem_limit: 2g
+#  cpu_shares: 1024
+#  ports:
+#    - "5432:5432"
+#    - "9001:9001"
+  volumes:
+    - ./pom:/pom
